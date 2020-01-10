@@ -1,4 +1,4 @@
-#Discord Bot
+# Discord Bot
 
 This repository contains a Discord bot named Cobb that is used for personal use and offers some support for Dungeons & Dragons gameplay.
 

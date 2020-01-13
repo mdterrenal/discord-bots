@@ -56,7 +56,7 @@ async def describe_spell(ctx, *spell_name):
                       'Concentration: ' + spell_data['concentration'].capitalize(), spell_data['casting_time'], spell_data['level']]
         await ctx.send('\n'.join(final_desc))
     elif extracted_data['count'] == 0:
-        await ctx.send('It seems that there is no matching spell for this. Please try again.')
+        await ctx.send('It seems that there is no matching spell for this. You might have misspelled the name. Please try again.')
 
 @bot.command(name='spell', help='Provides all spells of a specified level and specified class.')
 async def output_list_of_spells(ctx, level: int, dnd_class):
@@ -71,10 +71,10 @@ async def output_list_of_spells(ctx, level: int, dnd_class):
     if extracted_data['count'] > 1:
         results = extracted_data['results']
         spell_names = []
+        level_endings = {'1': 'st', '2': 'nd', '3': 'rd'}
         for result in results:
             spell_names.append(result['name'])
-            # TODO: Modify string to give correct output
-        await ctx.send('Here is a list of all ' + str(level) + ' level ' + dnd_class.capitalize() + ' spells:\n' + '\n'.join(spell_names))
+        await ctx.send('Here is a list of all ' + str(level) + level_endings.get(str(level), 'th') + ' level ' + dnd_class.capitalize() + ' spells:\n' + '\n'.join(spell_names))
     elif extracted_data['count'] == 0:
         await ctx.send('It seems that there are no matching spells for this. Please try again.')
 

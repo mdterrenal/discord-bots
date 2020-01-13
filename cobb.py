@@ -36,7 +36,8 @@ async def roll_dice(ctx, num_dice: int, num_sides: int):
 
 @bot.command(name='cast', help='Provides information about a specified spell.')
 async def describe_spell(ctx, *spell_name):
-    payload = {'format': 'json', 'search': ' '.join(spell_name)}
+    combined_spell_name = ' '.join(spell_name)
+    payload = {'format': 'json', 'search': combined_spell_name}
     url = 'https://api.open5e.com/spells'
     try:
         response = requests.get(url, params=payload)
@@ -45,16 +46,17 @@ async def describe_spell(ctx, *spell_name):
         await ctx.send('There was some error in retrieving the information. Please try again later.')
     extracted_data = response.json()
     if extracted_data['count'] > 1:
-        results = extracted_data['results']
+        no_match_exists = True
         spell_names = []
-        for result in results:
+        for result in extracted_data['results']:
             spell_names.append(result['name'])
-        await ctx.send('There are multiple results for that. Did you possibly mean any of the following spells:\n' + '\n'.join(spell_names))
+            if result['name'] == combined_spell_name.title():
+                no_match_exists = False
+                await ctx.send(provide_spell_info(result))
+        if no_match_exists:
+            await ctx.send('There are multiple results for that. Did you possibly mean any of the following spells:\n' + '\n'.join(spell_names))
     elif extracted_data['count'] == 1:
-        spell_data = extracted_data['results'][0]
-        final_desc = [spell_data['name'], spell_data['desc'], spell_data['range'], spell_data['components'], spell_data['duration'],
-                      'Concentration: ' + spell_data['concentration'].capitalize(), spell_data['casting_time'], spell_data['level']]
-        await ctx.send('\n'.join(final_desc))
+        await ctx.send(provide_spell_info(extracted_data['results'][0]))
     elif extracted_data['count'] == 0:
         await ctx.send('It seems that there is no matching spell for this. You might have misspelled the name. Please try again.')
 
@@ -78,9 +80,9 @@ async def output_list_of_spells(ctx, level: int, dnd_class):
     elif extracted_data['count'] == 0:
         await ctx.send('It seems that there are no matching spells for this. Please try again.')
 
-"""Upcoming features:
-- Monster blocks
-- Allow DMs to track monster health
-- Allow DMs to track initiative order?
-"""
+def provide_spell_info(spell_response):
+    final_desc = [spell_response['name'], spell_response['desc'], spell_response['range'], spell_response['components'], spell_response['duration'],
+                  'Concentration: ' + spell_response['concentration'].capitalize(), spell_response['casting_time'], spell_response['level']]
+    return '\n'.join(final_desc)
+
 bot.run(TOKEN)

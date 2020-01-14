@@ -80,9 +80,14 @@ async def output_list_of_spells(ctx, level: int, dnd_class):
     elif extracted_data['count'] == 0:
         await ctx.send('It seems that there are no matching spells for this. Please try again.')
 
+@bot.command(name='commands', help='Provide a list of all the commands that the bot accepts.')
+async def provide_command_list(ctx):
+    await ctx.send('Here is a list of all of the commands that you can use:\n!okay\n!smh\n!dank\n!r\n!cast\n!spell\n!commands\nUse !help command name to learn more about a specific command.')
+
 def provide_spell_info(spell_response):
     final_desc = [spell_response['name'], spell_response['desc'], spell_response['range'], spell_response['components'], spell_response['duration'],
                   'Concentration: ' + spell_response['concentration'].capitalize(), spell_response['casting_time'], spell_response['level']]
     return '\n'.join(final_desc)
+
 
 bot.run(TOKEN)

@@ -52,11 +52,11 @@ async def describe_spell(ctx, *spell_name):
             spell_names.append(result['name'])
             if result['name'] == combined_spell_name.title():
                 no_match_exists = False
-                await ctx.send(provide_description(result, True))
+                await ctx.send(provide_spell_description(result))
         if no_match_exists:
             await ctx.send('There are multiple results for that. Did you possibly mean any of the following spells:\n' + '\n'.join(spell_names))
     elif extracted_data['count'] == 1:
-        await ctx.send(provide_description(extracted_data['results'][0], True))
+        await ctx.send(provide_spell_description(extracted_data['results'][0]))
     elif extracted_data['count'] == 0:
         await ctx.send('It seems that there is no matching spell for this. You might have misspelled the name. Please try again.')
 
@@ -98,11 +98,11 @@ async def describe_monster_stats(ctx, *monster_name):
             monster_names.append(result['name'])
             if result['name'] == combined_monster_name.title():
                 no_match_exists = False
-                await ctx.send(provide_description(result, False))
+                await ctx.send(provide_monster_stats(result))
         if no_match_exists:
             await ctx.send('There are multiple results for that. Did you possibly mean any of the following monsters:\n' + '\n'.join(monster_names))
     elif extracted_data['count'] == 1:
-        await ctx.send(provide_description(extracted_data['results'][0], False))
+        await ctx.send(provide_monster_stats(extracted_data['results'][0]))
     elif extracted_data['count'] == 0:
         await ctx.send('It seems that there is no matching monster for this. You might have misspelled the name. Please try again.')
 
@@ -110,52 +110,58 @@ async def describe_monster_stats(ctx, *monster_name):
 async def provide_command_list(ctx):
     await ctx.send('Here is a list of all of the commands that you can use:\n!okay\n!smh\n!dank\n!r\n!cast\n!spell\n!commands\nUse !help command name to learn more about a specific command.')
 
-def provide_description(response, is_spell):
-    if is_spell:
-        final_desc = [response['name'], response['desc'], response['range'], response['components'], response['duration'],
-                      'Concentration: ' + response['concentration'].capitalize(), response['casting_time'], response['level']]
-    else:
-        ability_values_format = 'STR: {0}   DEX: {1}   CON: {2}   INT: {3}   WIS: {4}   CHA: {5}'
-        ability_values = ability_values_format.format(str(response['strength']), str(response['dexterity']), str(response['constitution']), str(response['intelligence']), str(response['wisdom']), str(response['charisma']))
-        final_desc = [response['name'], response['size'] + ' ' + response['type'] + ' ' + response['subtype'], 'HP: ' + str(response['hit_points']) + ' (' + response['hit_dice']+ ')', 'AC: ' + str(response['armor_class'])]
-        speed_stats = []
-        for type, speed in response['speed'].items():
-            speed_stats.append(type + ' ' + str(speed) + ' ft.')
-        speed_stats = ', '.join(speed_stats)
-        final_desc.extend(['Speed: ' + speed_stats, ability_values])
-        saving_throws = []
-        if response['strength_save']:
-            saving_throws.append('STR +' + str(response['strength_save']))
-        if response['dexterity_save']:
-            saving_throws.append('DEX +' + str(response['dexterity_save']))
-        if response['constitution_save']:
-            saving_throws.append('CON +' + str(response['constitution_save']))
-        if response['intelligence_save']:
-            saving_throws.append('INT +' + str(response['intelligence_save']))
-        if response['wisdom_save']:
-            saving_throws.append('WIS +' + str(response['wisdom_save']))
-        if response['charisma_save']:
-            saving_throws.append('CHA +' + str(response['charisma_save']))
-        if saving_throws:
-            saving_throws = ', '.join(saving_throws)
-            final_desc.append('Saving Throws: ' + saving_throws)
-        skills = []
-        for ability, boost in response['skills'].items():
-            skills.append(ability + ' +' + str(boost))
-        skills = ', '.join(skills)
-        final_desc.append('Skills: ' + skills)
-        if response['damage_vulnerabilities'] != "":
-            final_desc.append('Damage Vulnerabilities: ' + response['damage_vulnerabilities'])
-        if response['damage_resistances'] != "":
-            final_desc.append('Damage Resistances: ' + response['damage_resistances'])
-        if response['damage_immunities'] != "":
-            final_desc.append('Damage Immunities: ' + response['damage_immunities'])
-        if response['condition_immunities'] != "":
-            final_desc.append('Condition Immunities: ' + response['condition_immunities'])
-        final_desc.append('Senses: ' + response['senses'])
-        if response['languages'] != "":
-            final_desc.append('Languages: ' + response['languages'])
-        final_desc.append('Challenge Rating: ' + response['challenge_rating'])
+def provide_spell_description(response):
+    final_desc = [response['name'], response['desc'], response['range'], response['components'], response['duration'],
+                  'Concentration: ' + response['concentration'].capitalize(), response['casting_time'], response['level']]
+
+def provide_monster_stats(response):
+    ability_values_format = 'STR: {0}   DEX: {1}   CON: {2}   INT: {3}   WIS: {4}   CHA: {5}'
+    ability_values = ability_values_format.format(str(response['strength']), str(response['dexterity']), str(response['constitution']), str(response['intelligence']), str(response['wisdom']), str(response['charisma']))
+    final_desc = [response['name'], response['size'] + ' ' + response['type'] + ' ' + response['subtype'], 'HP: ' + str(response['hit_points']) + ' (' + response['hit_dice']+ ')', 'AC: ' + str(response['armor_class'])]
+    speed_stats = []
+    for type, speed in response['speed'].items():
+        speed_stats.append(type + ' ' + str(speed) + ' ft.')
+    speed_stats = ', '.join(speed_stats)
+    final_desc.extend(['Speed: ' + speed_stats, ability_values])
+    saving_throws = []
+    if response['strength_save']:
+        saving_throws.append('STR +' + str(response['strength_save']))
+    if response['dexterity_save']:
+        saving_throws.append('DEX +' + str(response['dexterity_save']))
+    if response['constitution_save']:
+        saving_throws.append('CON +' + str(response['constitution_save']))
+    if response['intelligence_save']:
+        saving_throws.append('INT +' + str(response['intelligence_save']))
+    if response['wisdom_save']:
+        saving_throws.append('WIS +' + str(response['wisdom_save']))
+    if response['charisma_save']:
+        saving_throws.append('CHA +' + str(response['charisma_save']))
+    if saving_throws:
+        saving_throws = ', '.join(saving_throws)
+        final_desc.append('Saving Throws: ' + saving_throws)
+    skills = []
+    for ability, boost in response['skills'].items():
+        skills.append(ability + ' +' + str(boost))
+    skills = ', '.join(skills)
+    final_desc.append('Skills: ' + skills)
+    if response['damage_vulnerabilities'] != "":
+        final_desc.append('Damage Vulnerabilities: ' + response['damage_vulnerabilities'])
+    if response['damage_resistances'] != "":
+        final_desc.append('Damage Resistances: ' + response['damage_resistances'])
+    if response['damage_immunities'] != "":
+        final_desc.append('Damage Immunities: ' + response['damage_immunities'])
+    if response['condition_immunities'] != "":
+        final_desc.append('Condition Immunities: ' + response['condition_immunities'])
+    final_desc.append('Senses: ' + response['senses'])
+    if response['languages'] != "":
+        final_desc.append('Languages: ' + response['languages'])
+    final_desc.append('Challenge Rating: ' + response['challenge_rating'])
     return '\n'.join(final_desc)
+
+"""Upcoming features:
+- Monster blocks
+- Allow DMs to track monster health
+- Allow DMs to track initiative order?
+"""
 
 bot.run(TOKEN)
